@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+    <div class="hand">
+        <div class="hand_left">
+            <label for="first">请输入房间号:</label>
+            <input id="first" name="name" type="text">
+            <button onclick="createRoom()">创建房间</button>
+        </div>
+        <div class="hand_right">
+            <button onclick="joinRoom()">加会</button>
+            <button onclick="leaveRoom()">退会</button>
+            <button onclick="boardSet()" id="boardSetBtn" disabled>白板设置</button>
+            <button onclick="screenshots()" id="createBoard" disabled>创建白板</button>
+            <button onclick="operateBoard()" id="operateBoard" disabled>关闭白板</button>
+            <button onclick="removeBoard()" id="clearBoard" disabled>移除白板</button>
+            <button onclick="videoCapture()" id="updateBoard" disabled>更改背景图</button>
+            <div id="changeBgColor">
+                <span>选择颜色 -></span>
+                <input type="color" id="chooseBgColor" disabled>
+                <button onclick="updateBoardBgColor()" id="updateBoardBgColor" disabled>更改背景色</button>
+            </div>
+
+            <div>
+                <input style="width: 100px;" type="number" name="board-width" id="board-width" placeholder="白板宽度" onchange="boardWHChange(this.value, 'width')">
+                <input style="width: 100px;" type="number" name="board-height" id="board-height" placeholder="白板高度" onchange="boardWHChange(this.value, 'height')">
+                <button onclick="backToOriginal()">还原</button>
+            </div>
+        </div>
+        <a id="receiverBtn" target="_blank">接收者页面</a>
+    </div>
+    <div class="boardSetDom" style="display: none;">
+        <div class="bgSet">
+            <input type="radio" name="boardSet" >
+            <span>白板底图设置：</span>
+            <div style="margin-left: 50px;">
+                <input type="radio" name="radio" checked>视频截图 <br>
+                <input type="radio" name="radio" id="custom">自定义图片
+                <input id="customUrl" style="width: 330px;"
+                    value="./img/bg.jpeg"
+                    type="text" placeholder="请输入图片地址">
+            </div>
+        </div>
+        <div class="colorSet">
+            <input type="radio" id="boardColorSet" name="boardSet" checked>
+            <span>白板底色设置：</span><br>
+            <div style="margin-left: 50px;">
+                <input style="width: 23px; height: 23px;" id="boardColorIpt" value="#ffffff" onchange="setBoardColor()"
+                    type="color">
+                <span id="boardColor">rgba(255,255,255,1)</span>
+            </div>
+        </div>
+        <button onclick="save()">确定</button>
+    </div>
+    <div class="promptMsg"></div>
+    <hr>
+
+    <div class="board">
+        <div class="board_video">
+            <video class="local_video" id="localVideo" autoplay muted></video>
+        </div>
+        <div class="board_board" id="board_board" style="width: 65%;">
+            <div class="board-tool" id="board-tool">
+                <div class="tool-item" onclick="chooseMouse()">
+                    <i class="icon_mouse"></i>
+                    <p>鼠标</p>
+                </div>
+                <div class="tool-item" onclick="startHlightPoint()">
+                    <i class="icon_boarder_laserPen"></i>
+                    <p>激光笔</p>
+                </div>
+                <div class="tool-item boarder_pen">
+                    <i class="icon_boarder_pen"></i>
+                    <p>笔</p>
+                    <div class="choose_pen">
+                        <i class="icon_brokenLine" onclick="selectChangeType(5)"></i>
+                        <i class="icon_straightLine" onclick="selectChangeType(2)"></i>
+                        <i class="icon_arrows" onclick="selectChangeType(999)"></i>
+                        <i class="icon_ellipse" onclick="selectChangeType(4)"></i>
+                        <i class="icon_rectangle" onclick="selectChangeType(3)"></i>
+                        <i class="icon_fillRectangle" onclick="selectChangeType(333)"></i>
+                        <i class="icon_rhombus" onclick="selectChangeType(11)"></i>
+                        <i class="icon_tick" onclick="selectChangeType(13)"></i>
+                        <i class="icon_fixationArrows" onclick="selectChangeType(12)"></i>
+                        <i class="icon_cross" onclick="selectChangeType(14)"></i>
+                    </div>
+                </div>
+                <div class="tool-item">
+                    <input style="width: 23px; height: 23px;" id="colorIpt" onchange="selectToolColorChange()"
+                        type="color">
+                    <p>颜色</p>
+                </div>
+                <div class="tool-item" onclick="clearAnnotation()">
+                    <i class="icon_boarder_eraser"></i>
+                    <p>橡皮擦</p>
+                </div>
+                <div class="tool-item" onclick="eraser()">
+                    <i class="icon_boarder_clear"></i>
+                    <p>清除</p>
+                </div>
+                <div class="tool-item" onclick="download()">
+                    <i class="icon_boarder_save"></i>
+                    <p>保存</p>
+                </div>
+                
+                <div class="tool-item">
+                    <i class="icon_img_upload"></i>
+                    <p>上传图</p>
+                </div>
+                <input type="file" class="file_upload_btn"  onchange="uploadImg(this)" />
+                <div class="tool-item" onclick="setAllowEditImg()">
+                    <i class="icon_img_edit"></i>
+                    <p>编辑图</p>
+                </div>
+                <div class="tool-item" onclick="rotateImg()">
+                    <i class="icon_img_rotate"></i>
+                    <p>旋转图</p>
+                </div>
+                <div class="tool-item" onclick="delImg()">
+                    <i class="icon_img_delete"></i>
+                    <p>删除图</p>
+                </div>
+                <div class="tool-item" onclick="scaleImg(true, 0.1)">
+                    <i class="icon_img_enlarge"></i>
+                    <p>放大图</p>
+                </div>
+                <div class="tool-item" onclick="scaleImg(false, 0.1)">
+                    <i class="icon_img_narrow"></i>
+                    <p>缩小图</p></p>
+                </div>
+                <div class="tool-item" onclick="startTextInput()">
+                    <i class="icon_text"></i>
+                    <p>文字</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <canvas style="display: none;" id="canvas"></canvas>
+    
+    <script src="../lib/cn.tee3.avd-4.0.5.3.min.js?timestamp=20230506160522"></script>
+    <script src="../lib/jquery.min.js"></script>
+    <script src="../common/restAPI.js"></script>
+    <script src="../lib/config.js"></script>
+    <script src="./js/common.js"></script>
+    <script src="./js/index.js"></script>
+</body>
+
+</html>
